@@ -1,0 +1,27 @@
+service: file-service
+provider:
+  name: aws
+  runtime: provided.al2023
+  region: eu-west-1
+  architecture: arm64
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource: "arn:aws:s3:::*/*"
+
+package:
+  individually: true
+
+functions:
+  api:
+    handler: bootstrap
+    package:
+      artifact: target/lambda/http_handler/bootstrap.zip
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
