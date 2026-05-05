@@ -54,4 +54,18 @@ impl FileStoragePort for S3FileStorage {
 
         Ok(presigned.uri().to_string())
     }
+
+    async fn delete_file(&self, project_name: &str, file_name: &str) -> Result<(), Error> {
+        self.client
+            .delete_object()
+            .bucket(project_name)
+            .key(file_name)
+            .send()
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to delete file: {e}");
+                Error::internal_server("Failed to delete file")
+            })?;
+        Ok(())
+    }
 }

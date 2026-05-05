@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{delete, get},
+    Router,
+};
 use lambda_http::{run, Error};
 
 use crate::infrastructure::{bootstrap::setup, http::file_routes};
@@ -12,10 +15,17 @@ mod infrastructure;
 async fn get_router() -> Router {
     let state = setup().await;
     Router::new()
-        .route("/upload/{project_name}", get(file_routes::get_upload_url))
+        .route(
+            "/upload/{project_name}/{file_name}",
+            get(file_routes::get_upload_url),
+        )
         .route(
             "/download/{project_name}/{file_name}",
             get(file_routes::get_download_url),
+        )
+        .route(
+            "/delete/{project_name}/{file_name}",
+            delete(file_routes::delete_file),
         )
         .with_state(Arc::new(state))
 }
